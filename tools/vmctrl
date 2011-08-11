@@ -1,0 +1,73 @@
+#!/bin/sh
+# Wrappers for managing VMs inside of virtpool infrastructure.
+
+vmNAME=$1
+#vmNAME=test
+RAM=1024
+VCPUS=1
+
+# Creation
+create() {
+    if [ -z "${vmNAME}" ]; then echo "vmNAME not set"; exit 0; fi
+    if [ -z "${RAM}" ]; then echo "RAM not set, assuming 1024MB"; RAM=1024; fi
+    if [ -z "${VCPUS}" ]; then echo "VCPUS not set, assuming 1"; VCPUS=1; fi 
+    sudo lvcreate -n ${vmNAME} -L 10G vol_guests
+    sudo /usr/sbin/virt-install --accelerate --name ${vmNAME} --ram ${RAM} --vnc --os-type=linux --os-variant=rhel6 --bridge=bridge0 --disk /dev/vol_guests/${vmNAME} --vcpus=${VCPUS} --keymap='en-us' --location=http://129.15.41.46/rhel6_install/  --extra-args "ks=http://129.15.41.46/ks/ks64.cfg" 
+
+    echo "Don't forget to add an entry in /etc/cluster/cluster.conf"
+    echo 'Example: 
+ <vm migrate="live" name="${vmNAME}" path="/etc/libvirt/qemu" recovery="relocate"/> 
+ cman_tool -r version'
+}
+
+
+create_debian() {
+    if [ -z "${vmNAME}" ]; then echo "vmNAME not set"; exit 0; fi
+    if [ -z "${RAM}" ]; then echo "RAM not set, assuming 1024MB"; RAM=1024; fi
+    if [ -z "${VCPUS}" ]; then echo "VCPUS not set, assuming 1"; VCPUS=1; fi 
+    sudo lvcreate -n ${vmNAME} -L 10G vol_guests
+    sudo /usr/sbin/virt-install --accelerate --name ${vmNAME} --ram ${RAM} --vnc --os-type=linux --os-variant=debiansqueeze --bridge=bridge0 --disk /dev/vol_guests/${vmNAME} --vcpus=${VCPUS} --keymap='en-us' --location=http://129.15.41.46/debian-6.0.2.1/
+
+    echo "Don't forget to add an entry in /etc/cluster/cluster.conf"
+    echo 'Example: 
+ <vm migrate="live" name="${vmNAME}" path="/etc/libvirt/qemu" recovery="relocate"/> 
+ cman_tool -r version'
+
+}
+
+createdatadisk() {
+    lvcreate -n ${vmNAME} -L ${dataSize} vol_guests
+    virsh attach-disk cc_static /dev/mapper/vol_data-cc_test vdb --driver physical --sourcetype block
+    
+
+}
+
+# Stopping
+stop() {
+    clusvcadm -d vm:${vmNAME}
+}
+
+# Removal
+annihilate() {
+    clusvcadm -d vm:${vmNAME}
+    virsh destroy ${vmNAME}
+    virsh undefine ${vmNAME}
+    lvremove vol_guests/${vmNAME}
+    echo "Don't forget to remove entry in /etc/cluster/cluster.conf and run cman_tool -r version"
+}
+
+# Listing
+list() {
+    clustat
+}
+
+
+clone() {
+    sudo lvcreate -n ${vmNAME} -L 10G vol_guests
+    virt-clone -f /dev/vol_guests/${vmNAME} -o ${origNAME} 
+
+}
+cmd=$2
+
+eval ${cmd}
+
