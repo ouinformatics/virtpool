@@ -6,6 +6,6 @@ sudo chmod +x /etc/init.d/celeryd
 sudo /sbin/chkconfig --add /etc/init.d/celeryd
 sudo mkdir /opt/celeryq
 cd /opt/celeryq
-sudo ./virtpy/bin/pip install Celery
+sudo ./virtpy/bin/pip install Celery simplejson sqlalchemy
 
 # Download queue's worker code
