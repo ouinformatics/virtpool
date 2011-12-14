@@ -27,6 +27,23 @@ def condor():
     env.virtpy = '/opt/celeryq/virtpy'
     env.log = '/var/log/celeryd/celery.log'
     env.hosts = ['condor_vm.cybercommons.org']
+    
+def gis():
+    env.os = 'redhat'
+    env.settings = 'gis'
+    env.path = '/opt/celeryq'
+    env.virtpy = '/opt/celeryq/virtpy'
+    env.log = '/var/log/celeryd/celery.log'
+    env.hosts = ['129.15.41.74']
+
+def setup():
+    sudo('/usr/sbin/useradd celeryd')
+    sudo('mkdir /var/log/celeryd')
+    sudo('chown -R celeryd /var/log/celeryd')
+    sudo('mkdir /opt/celeryq')
+    sudo('chown -R celeryd /opt/celeryq')
+    sudo('virtualenv --no-site-packages /opt/celeryq/virtpy', user=celeryd
+    sudo('/opt/celeryq/virtpy/bin/pip install celery pymongo sqlalchemy geojson', user=celeryd)
 
 def bounce():
     if env.os == 'redhat':
