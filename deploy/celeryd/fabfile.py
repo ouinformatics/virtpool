@@ -42,7 +42,7 @@ def setup():
     sudo('chown -R celeryd /var/log/celeryd')
     sudo('mkdir /opt/celeryq')
     sudo('chown -R celeryd /opt/celeryq')
-    sudo('virtualenv --no-site-packages /opt/celeryq/virtpy', user=celeryd
+    sudo('virtualenv --no-site-packages /opt/celeryq/virtpy', user=celeryd)
     sudo('/opt/celeryq/virtpy/bin/pip install celery pymongo sqlalchemy geojson', user=celeryd)
 
 def bounce():
