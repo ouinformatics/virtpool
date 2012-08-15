@@ -2,7 +2,7 @@ BROKER_HOST = "localhost"
 BROKER_PORT = 5672
 BROKER_USER = "floworks"
 BROKER_PASSWORD = "floworksq"
-BROKER_VHOST = "floworks"
+BROKER_VHOST = "floworksq"
 
 
 CELERY_RESULT_BACKEND = "mongodb"
