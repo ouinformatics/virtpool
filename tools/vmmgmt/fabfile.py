@@ -58,4 +58,26 @@ def update_packages():
 def bounce(service="httpd"):
     sudo('/etc/init.d/%(service)s restart' % locals() )
 
+@hosts('node01.cybercommons.org')
+def lsvm():
+    """ List all clusterized VMs """
+    sudo('clustat')
 
+@hosts('node01.cybercommons.org')
+def bouncevm(service):
+    """ Restart a clusterized VM """
+    sudo('clusvcadm -s %s;clusvcadm -e %s' % (service, service))
+
+@hosts('node01.cybercommons.org')
+def stopvm(service):
+    sudo('clusvcadm -s %s' % service)
+
+def installmongos():
+    """ Install mongos on a redhat/centos guest """
+    sudo('yum install mongodb-server')
+    sudo('wget "https://raw.github.com/ouinformatics/virtpool/master/mongo/mongos" -O /etc/init.d/mongos')
+    sudo('chmod +x /etc/init.d/mongos')
+    sudo('/usr/sbin/adduser mongod')
+    sudo('chown mongod /var/log/mongodb')
+    sudo('chkconfig mongos on')
+    sudo('service mongos start')
