@@ -1,7 +1,5 @@
 from fabric.api import run, sudo, hosts
 
-
-
 @hosts('node01.cybercommons.org')
 def mklv(vmname=None, size=None, pool=None):
     ''' Make an LV '''
@@ -27,15 +25,16 @@ def rmlv(vmname=None, pool='vol_guests'):
 def virtinstall(vmname=None, ram="1024", vcpus="1", net="bridge0",os="redhat"):        
     if os == 'redhat':
         if locals()['vmname']:
-            sudo('virt-install --accelerate --name %(vmname)s --ram %(ram)s --vnc --os-type=linux --os-variant=rhel6 --bridge=%(net)s --disk /dev/vol_guests/%(vmname)s --vcpus=%(vcpus)s --keymap="en-us" --location=http://129.15.41.46/rhel6_install/ --extra-args "ks=http://129.15.41.46/ks/ks64.cfg"' % locals())
+            sudo('virt-install --accelerate --name %(vmname)s --ram %(ram)s --vnc --os-type=linux --os-variant=rhel6 --bridge=%(net)s --disk /dev/vol_guests/%(vmname)s --vcpus=%(vcpus)s --keymap="en-us" --location=http://129.15.41.46/centos6_install/ --extra-args "ks=http://129.15.41.46/ks/ks64.cfg"' % locals())
     if os == 'ubuntu':
         if locals()['vmname']:
             sudo('virt-install --accelerate --name %(vmname)s --ram %(ram)s --vnc --os-type=linux --os-variant=ubuntumaverick --location=http://static.cybercommons.org/jduckles/mini.iso --keymap="en-us" --vcpus=%(vcpus)s --bridge=%(net)s --disk /dev/vol_guests/%(vmname)s' % locals() )
 
-def newvm(vmname=None, vcpus="1", ram="1024", guest_disk='10G', data_disk="100G", os="redhat" ):
+def newvm(vmname=None, vcpus="1", ram="1024", guest_disk='10G', data_disk=None, os="redhat" ):
     ''' Make a new vm '''
     mkguestlv(vmname, size=guest_disk)
-    mkdatalv(vmname, size=data_disk)
+    if data_disk:
+        mkdatalv(vmname, size=data_disk)
     virtinstall(vmname, ram=ram, vcpus=vcpus, os=os)
     raise NotImplementedError
 
