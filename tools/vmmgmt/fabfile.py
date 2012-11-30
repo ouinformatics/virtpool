@@ -46,10 +46,13 @@ def newvm(vmname=None, vcpus="1", ram="1024", guest_disk='10G', data_disk=None, 
     virtinstall(vmname, ram=ram, vcpus=vcpus, os=os)
     raise NotImplementedError
 
-def clusterize():
+def clusterize(vmname):
     ''' Cluster the vm '''
-    raise NotImplementedError
+    sudo( 'ccs -f /etc/cluster/cluster.conf --sync --activate --addvm %s migrate="live" path="/etc/libvirt/qemu" recovery="relocate"' % (vmname) )
 
+def declusterize(vmname):
+    ''' Declusterize vm '''
+    sudo( "ccs -f /etc/cluster/cluster.conf --rmvm %s --sync --activate" % (vmname) )
 
 def lsvms(vmname=None):
     ''' Get list/status of clustered vms optionally returns status of specific vm '''
