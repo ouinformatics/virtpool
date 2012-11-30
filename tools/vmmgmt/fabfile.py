@@ -1,6 +1,14 @@
-from fabric.api import run, sudo, hosts
+from fabric.api import run, sudo, hosts, env
 
-@hosts('node01.cybercommons.org')
+def node01():
+    env.hosts=['root@node01.cybercommons.org']
+def node02():
+    env.hosts=['root@node02.cybercommons.org']
+def node03():
+    env.hosts=['root@node03.cybercommons.org']
+def node04():
+    env.hosts=['root@node04.cybercommons.org']
+
 def mklv(vmname=None, size=None, pool=None):
     ''' Make an LV '''
     if vmname:
@@ -22,15 +30,15 @@ def rmlv(vmname=None, pool='vol_guests'):
     else:
         print("Without vmname, can't remove lv")
 
-def virtinstall(vmname=None, ram="1024", vcpus="1", net="bridge0",os="redhat"):        
-    if os == 'redhat':
+def virtinstall(vmname=None, ram="1024", vcpus="1", net="bridge0",os="centos"):        
+    if os == 'centos':
         if locals()['vmname']:
             sudo('virt-install --accelerate --name %(vmname)s --ram %(ram)s --vnc --os-type=linux --os-variant=rhel6 --bridge=%(net)s --disk /dev/vol_guests/%(vmname)s --vcpus=%(vcpus)s --keymap="en-us" --location=http://129.15.41.46/centos6_install/ --extra-args "ks=http://129.15.41.46/ks/ks64.cfg"' % locals())
     if os == 'ubuntu':
         if locals()['vmname']:
             sudo('virt-install --accelerate --name %(vmname)s --ram %(ram)s --vnc --os-type=linux --os-variant=ubuntumaverick --location=http://static.cybercommons.org/jduckles/mini.iso --keymap="en-us" --vcpus=%(vcpus)s --bridge=%(net)s --disk /dev/vol_guests/%(vmname)s' % locals() )
 
-def newvm(vmname=None, vcpus="1", ram="1024", guest_disk='10G', data_disk=None, os="redhat" ):
+def newvm(vmname=None, vcpus="1", ram="1024", guest_disk='10G', data_disk=None, os="centos" ):
     ''' Make a new vm '''
     mkguestlv(vmname, size=guest_disk)
     if data_disk:
@@ -49,7 +57,10 @@ def lsvms(vmname=None):
         sudo('clustat -s vm:%(vmname)s' % locals())
     else:
         sudo('clustat')
-
+def vmconfig(vmname=None):
+    ''' View config of specific vm '''
+    if vmname:
+        sudo('cat /etc/libvirt/qemu/%(vmname)s.xml' % locals())
 
 def update_packages():
     sudo('yum update')
