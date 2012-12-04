@@ -30,7 +30,7 @@ def rmlv(vmname=None, pool='vol_guests'):
     else:
         print("Without vmname, can't remove lv")
 
-def virtinstall(vmname=None, ram="1024", vcpus="1", net="bridge0",os="centos"):        
+def virtinstall(vmname=None, ram="1024", vcpus="1", net0="bridge0", net1="bridge1", os="centos", kickstart="ks=http://129.15.41.46/ks/ks64.cfg"):
     if os == 'centos':
         if locals()['vmname']:
             sudo('virt-install --accelerate --name %(vmname)s --ram %(ram)s --vnc --os-type=linux --os-variant=rhel6 --bridge=%(net)s --disk /dev/vol_guests/%(vmname)s --vcpus=%(vcpus)s --keymap="en-us" --location=http://129.15.41.46/centos6_install/ --extra-args "ks=http://129.15.41.46/ks/ks64.cfg"' % locals())
@@ -60,6 +60,7 @@ def lsvms(vmname=None):
         sudo('clustat -s vm:%(vmname)s' % locals())
     else:
         sudo('clustat')
+
 def vmconfig(vmname=None):
     ''' View config of specific vm '''
     if vmname:
