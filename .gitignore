@@ -2,3 +2,7 @@
 *.pyc
 
 tools/.DS_Store
+
+*.swo
+
+*.swo
