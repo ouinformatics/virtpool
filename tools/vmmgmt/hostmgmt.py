@@ -1,5 +1,7 @@
 from fabric.api import *
 from fabric.colors import *
+from fabric.contrib.files import *
+
 def lastlog():
     ll = run('lastlog | grep -v "Never logged in"')
     print(blue(ll))
@@ -20,6 +22,14 @@ def ssh_config():
         print(red("Root login allowed"))
     else:
         print(green("Root logins not allowed over ssh"))
+
+def saltify():
+    if not exists('/etc/yum.repos.d/epel.repo'): 
+        sudo('rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm')
+    sudo('yum install salt-minion -y ')
+    append('/etc/hosts', '129.15.41.46  salt', use_sudo=True)
+    sudo('service salt-minion start')
+
 
 def show_iptables():
     iptables = sudo('cat /etc/sysconfig/iptables', quiet=True)
