@@ -9,33 +9,67 @@ def node04():
     env.hosts=['root@node04.cybercommons.org']
 
 def mklv(vmname=None, size=None, pool=None):
-    ''' Make an LV '''
+    """
+    Make a logical volume
+   
+    Parameters
+    ----------
+    vmname - virtual machine name
+    size - the size of the vm ie 10G, 1T etc.
+    pool - which storage pool 
+    """ 
     if vmname:
         sudo( 'lvcreate -n %(vmname)s -L %(size)s %(pool)s' % locals() )
     else:
         print("Couldn't create logical volume, no vmname given")
 
 def mkguestlv(vmname=None, size="10G", pool="vol_guests"):
-    ''' Make an LV with defaults appropriate for guests '''
+    """
+    Make an LV with defaults appropriate for guests 
+
+    Parameters
+    ----------
+    vmname - string name for virtual machine
+    size - the size of the vm ie 10G, 1T etc. (defaults to 10G)
+    pool - which storage pool to use, (defaults to `vol_guests`)
+
+    """
     mklv(**locals())
 
 def mkdatalv(vmname=None, size='100G', pool="vol_data"):
-    ''' Make an LV with defaults appropriate for data drives '''
+    """ 
+    Make an LV with defaults appropriate for data drives 
+    
+    Parameters
+    ----------
+    vmname - string name for virtual machine
+    size - the size of the vm ie 10G, 1T etc. (defaults to 10G)
+    pool - which storage pool to use, (defaults to `vol_data`)
+
+    """
     mklv(**locals())
 
 def rmlv(vmname=None, pool='vol_guests'):
+    """ 
+    Remove a logical volume 
+    """
     if vmname:
         sudo('lvremove /dev/%(pool)s/%(vmname)s' % locals())
     else:
         print("Without vmname, can't remove lv")
 
 def virtinstall(vmname=None, ram="1024", vcpus="1", net0="bridge0", net1="bridge1", os="centos", kickstart="ks=http://129.15.41.46/ks/ks64.cfg"): 
+    """
+    Setup and install a new VM
+    """
     if os == 'centos':
         if locals()['vmname']:
             sudo('virt-install --accelerate --name %(vmname)s --vnc --ram %(ram)s --os-type=linux --os-variant=rhel6 --bridge=%(net0)s --bridge=%(net1)s --disk /dev/vol_guests/%(vmname)s --vcpus=%(vcpus)s --keymap="en-us" --location=http://129.15.41.46/centos6_install/ --extra-args "ks=http://129.15.41.46/ks/ks64.cfg"' % locals())
     if os == 'ubuntu':
         if locals()['vmname']:
             sudo('virt-install --accelerate --name %(vmname)s --ram %(ram)s --vnc --os-type=linux --os-variant=ubuntumaverick --location=http://static.cybercommons.org/jduckles/mini.iso --keymap="en-us" --vcpus=%(vcpus)s --bridge=%(net)s --disk /dev/vol_guests/%(vmname)s' % locals() )
+            # Need to attach secondary disks as well.
+
 
 def newvm(vmname=None, vcpus="1", ram="1024", guest_disk='10G', data_disk=None, os="centos" ):
     ''' Make a new vm '''
@@ -48,10 +82,12 @@ def newvm(vmname=None, vcpus="1", ram="1024", guest_disk='10G', data_disk=None, 
 def clusterize(vmname):
     ''' Cluster the vm '''
     sudo( 'ccs -f /etc/cluster/cluster.conf --sync --activate --addvm %s migrate="live" path="/etc/libvirt/qemu" recovery="relocate"' % (vmname) )
+    sudo('cman_tool -r version')
 
 def declusterize(vmname):
     ''' Declusterize vm '''
     sudo( "ccs -f /etc/cluster/cluster.conf --rmvm %s --sync --activate" % (vmname) )
+    sudo( 'cman_tool -r version')
 
 def lsvms(vmname=None):
     ''' Get list/status of clustered vms optionally returns status of specific vm '''
